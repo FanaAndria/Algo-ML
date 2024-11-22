@@ -16,6 +16,7 @@ BLACK = (0, 0, 0)
 BLUE = (0, 122, 122)
 GRAY = (200, 200, 200)
 GREEN = (0, 200, 0)
+RED = (200, 0, 0)
 
 # Variables globales
 GRID_SIZE = 3  # Par défaut, 8-puzzle
@@ -85,7 +86,7 @@ def resolve_puzzle():
     global empty_pos
 
     if not is_solvable(grid):
-        print("Ce puzzle est non solvable.")
+        show_unsolvable_dialog()
         return
 
     goal = [[(i * GRID_SIZE + j + 1) % (GRID_SIZE * GRID_SIZE) for j in range(GRID_SIZE)] for i in range(GRID_SIZE)]
@@ -113,12 +114,34 @@ def resolve_puzzle():
         pygame.display.flip()
         time.sleep(0.12)  # Pause pour animer chaque mouvement
 
+# Affichage d'une boîte de dialogue pour état insolvable
+def show_unsolvable_dialog():
+    dialog_text = FONT.render("État insolvable!", True, RED)
+    dialog_rect = dialog_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
+    advice_text = FONT.render("Cliquer pour continuer", True, BLACK)
+    advice_rect = advice_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+    
+    screen.fill(WHITE)
+    screen.blit(dialog_text, dialog_rect)
+    screen.blit(advice_text, advice_rect)
+    pygame.display.flip()
+
+    # Pause jusqu'à ce que l'utilisateur clique
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
+
 
 # Affichage d'une boîte de dialogue de victoire
 def show_win_dialog():
     dialog_text = FONT.render("Vous avez gagné!", True, GREEN)
     dialog_rect = dialog_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
-    ok_text = FONT.render("Cliquez pour continuer", True, BLACK)
+    ok_text = FONT.render("Cliquer pour continuer", True, BLACK)
     ok_rect = ok_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
 
     screen.fill(WHITE)
@@ -135,7 +158,6 @@ def show_win_dialog():
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 waiting = False
-
 
 
 # Boucle principale
