@@ -42,19 +42,31 @@ def draw_buttons(screen):
     screen.blit(text_15, (230, 460))
     screen.blit(text_resolve, (140, 520))
 
-# Affichage de la grille
+# Fonction pour dessiner la grille avec les tuiles sélectionnées mises en surbrillance
 def draw_grid(screen, grid, grid_size):
     screen.fill(WHITE)
     for row in range(grid_size):
         for col in range(grid_size):
             tile = grid[row][col]
+            rect = pygame.Rect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+
+            # Dessine la tuile
             if tile != 0:
-                pygame.draw.rect(screen, BLUE, (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                pygame.draw.rect(screen, BLUE, rect)
                 text = FONT.render(str(tile), True, WHITE)
                 text_rect = text.get_rect(center=(col * TILE_SIZE + TILE_SIZE // 2, row * TILE_SIZE + TILE_SIZE // 2))
                 screen.blit(text, text_rect)
-            pygame.draw.rect(screen, BLACK, (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE), 2)
+            
+            # Dessine les bordures de la grille
+            pygame.draw.rect(screen, BLACK, rect, 2)
+
+             # revérifie si une tuile est sélectionnée et la met en surbrillance (bordure jaune)
+            if (row, col) in selected_tiles:
+                pygame.draw.rect(screen, (255, 255, 0), rect, 5)  # Jaune pour la sélection
+    
     draw_buttons(screen)
+
+
 
 # Mouvement des tuiles
 def move_tile(grid, row, col, empty_row, empty_col):
@@ -141,15 +153,19 @@ def game_loop():
                 elif 130 <= x <= 270 and 510 <= y <= 560:  # Bouton Resolver
                     resolve_puzzle()
                 else:
-                    # Handle tile selection for swapping
+                    # Gestion de la sélection des tuiles pour le swap
                     row = y // TILE_SIZE
                     col = x // TILE_SIZE
-                    if row < GRID_SIZE and col < GRID_SIZE:  # Ensure click is inside the grid
-                        selected_tiles.append((row, col))
+                    if row < GRID_SIZE and col < GRID_SIZE:  # Assure que le clic est dans la grille
+                        if (row, col) in selected_tiles:
+                            selected_tiles.remove((row, col))  # Désélectionne si déjà sélectionnée
+                        else:
+                            selected_tiles.append((row, col))
+                        
+                        # Effectue le swap si deux tuiles sont sélectionnées
                         if len(selected_tiles) == 2:
                             swap_tiles(grid, selected_tiles[0], selected_tiles[1])
-                            selected_tiles = []  # Reset after swap
-
+                            selected_tiles.clear()  # Réinitialise après le swap
 
         draw_grid(screen, grid, GRID_SIZE)
         pygame.display.flip()
