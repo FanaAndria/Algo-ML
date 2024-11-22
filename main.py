@@ -1,7 +1,7 @@
 import pygame
 import time
-from  puzzle_resolver import a_star, get_neighbors, manhattan_distance
-from puzzle_util import create_puzzle, is_goal, is_solvable
+from  puzzle_resolver import a_star
+from puzzle_util import create_puzzle, is_solvable
 
 # Initialisation
 pygame.init()
@@ -22,7 +22,12 @@ GRID_SIZE = 3  # Par défaut, 8-puzzle
 TILE_SIZE = SCREEN_WIDTH // GRID_SIZE
 grid = []
 empty_pos = None
+selected_tiles = []
 
+def swap_tiles(grid, pos1, pos2):
+    r1, c1 = pos1
+    r2, c2 = pos2
+    grid[r1][c1], grid[r2][c2] = grid[r2][c2], grid[r1][c1]
 
 # Affichage des boutons
 def draw_buttons(screen):
@@ -98,6 +103,7 @@ def resolve_puzzle():
 
 # Boucle principale
 def game_loop():
+    global selected_tiles
     global empty_pos
 
     # Initialisation du puzzle
@@ -134,6 +140,16 @@ def game_loop():
                     change_puzzle(4)
                 elif 130 <= x <= 270 and 510 <= y <= 560:  # Bouton Resolver
                     resolve_puzzle()
+                else:
+                    # Handle tile selection for swapping
+                    row = y // TILE_SIZE
+                    col = x // TILE_SIZE
+                    if row < GRID_SIZE and col < GRID_SIZE:  # Ensure click is inside the grid
+                        selected_tiles.append((row, col))
+                        if len(selected_tiles) == 2:
+                            swap_tiles(grid, selected_tiles[0], selected_tiles[1])
+                            selected_tiles = []  # Reset after swap
+
 
         draw_grid(screen, grid, GRID_SIZE)
         pygame.display.flip()
