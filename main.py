@@ -120,10 +120,10 @@ def draw_buttons(screen):
 
     text_8 = FONT.render("3x3 (8)", True, BLACK)
     text_15 = FONT.render("4x4 (15)", True, BLACK)
-    text_resolve = FONT.render("Resolver", True, BLACK)
+    text_resolve = FONT.render("Résoudre", True, WHITE)
     screen.blit(text_8, (70, 460))
     screen.blit(text_15, (230, 460))
-    screen.blit(text_resolve, (150, 520))
+    screen.blit(text_resolve, (140, 520))
 
 # Affichage de la grille
 def draw_grid(screen, grid, grid_size):
@@ -151,22 +151,6 @@ def change_puzzle(new_size):
     grid = create_puzzle(GRID_SIZE)
     empty_pos = [(r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE) if grid[r][c] == 0][0]
 
-def draw_loading_text(screen, text):
-    # Texte de chargement centré
-    loading_text = FONT.render(text, True, BLACK)
-    loading_rect = loading_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-    screen.blit(loading_text, loading_rect)
-    pygame.display.flip()
-
-def draw_loading_bar(screen, progress):
-    bar_width = 300
-    bar_height = 30
-    x = (SCREEN_WIDTH - bar_width) // 2
-    y = SCREEN_HEIGHT // 2 + 50
-    pygame.draw.rect(screen, GRAY, (x, y, bar_width, bar_height))
-    pygame.draw.rect(screen, GREEN, (x, y, bar_width * progress, bar_height))  # Progression
-    pygame.display.flip()
-
 # Résolution en temps réel
 def resolve_puzzle():
     global empty_pos
@@ -176,13 +160,12 @@ def resolve_puzzle():
         return
 
     goal = [[(i * GRID_SIZE + j + 1) % (GRID_SIZE * GRID_SIZE) for j in range(GRID_SIZE)] for i in range(GRID_SIZE)]
-
-    # Affichage de l'écran de chargement avec texte centré
-    screen.fill(WHITE)  # Fond blanc pour toute la fenêtre
-    draw_loading_text(screen, "Résolution en cours...")
-
-    # Affichage de la barre de progression
-    draw_loading_bar(screen, 0)
+    # Affichage de l'écran de chargement
+    loading_text = FONT.render("Résolution en cours...", True, BLACK)
+    loading_rect = loading_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.fill(WHITE)
+    screen.blit(loading_text, loading_rect)
+    pygame.display.flip()
 
     path = a_star(grid, goal)
 
@@ -190,6 +173,7 @@ def resolve_puzzle():
     screen.fill(WHITE)
     draw_grid(screen, grid, GRID_SIZE)
     pygame.display.flip()
+
 
     for move in path:
         row, col = empty_pos
