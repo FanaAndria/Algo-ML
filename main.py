@@ -2,6 +2,8 @@ import pygame
 import time
 from  puzzle_resolver import a_star
 from puzzle_util import create_puzzle, is_solvable, is_goal
+from tkinter import Tk, simpledialog
+
 
 # Initialisation
 pygame.init()
@@ -25,12 +27,33 @@ grid = []
 empty_pos = None
 selected_tiles = []
 move_count = 0  # Compteur de mouvements de l'utilisateur
-k = 5  # Nombre de mouvements nécessaires pour autoriser un échange (modifiable)
+k = 0  # Nombre de mouvements nécessaires pour autoriser un échange (modifiable)
 has_swapped = False # Determine si l'utilisateur a effectué une échange
 
 # Fonction pour vérifier si un échange est autorisé
 def can_swap():
     return move_count > 0 and move_count % k == 0 and not has_swapped
+
+
+# Fonction pour afficher une boîte de dialogue pour définir ou modifier k
+def prompt_for_k():
+    global k
+    # Utilisation de Tkinter pour obtenir une entrée utilisateur
+    root = Tk()
+    root.withdraw()  # Cache la fenêtre principale de Tkinter
+    try:
+        new_k = simpledialog.askinteger(
+            "Changer K",
+            "Entrez une nouvelle valeur pour K (doit être un entier positif) :",
+            minvalue=1
+        )
+        if new_k is not None:  # Assure qu'une valeur a été entrée
+            k = new_k
+            print(f"Nouvelle valeur de k : {k}")  # Debug ou affichage facultatif
+    except ValueError:
+        print("Valeur non valide. K reste inchangé.")
+    finally:
+        root.destroy()
 
 
 def swap_tiles(grid, pos1, pos2):
@@ -50,6 +73,8 @@ def draw_buttons(screen):
     screen.blit(text_8, (70, 460))
     screen.blit(text_15, (230, 460))
     screen.blit(text_resolve, (140, 520))
+
+
 
 # Fonction pour dessiner la grille avec les tuiles sélectionnées mises en surbrillance
 def draw_grid(screen, grid, grid_size):
@@ -178,8 +203,11 @@ def game_loop():
     global screen
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Puzzle Slider")
-    running = True
 
+    # Demande initiale pour la valeur de k
+    prompt_for_k()
+
+    running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -218,6 +246,9 @@ def game_loop():
                     has_swapped = 0
                 elif 130 <= x <= 270 and 510 <= y <= 560:  # Bouton Resolver
                     resolve_puzzle()
+                elif 50 <= x <= 250 and 570 <= y <= 620:  # Bouton "Changer K"
+                    prompt_for_k()
+
                 else:
                     # Gestion de la sélection des tuiles pour le swap
                     row = y // TILE_SIZE
