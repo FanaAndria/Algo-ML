@@ -1,7 +1,7 @@
 import pygame
 import time
 from  puzzle_resolver import a_star
-from puzzle_util import create_puzzle, is_solvable
+from puzzle_util import create_puzzle, is_solvable, is_goal
 
 # Initialisation
 pygame.init()
@@ -111,7 +111,32 @@ def resolve_puzzle():
         empty_pos = (new_row, new_col)
         draw_grid(screen, grid, GRID_SIZE)
         pygame.display.flip()
-        time.sleep(0.1)  # Pause pour animer chaque mouvement
+        time.sleep(0.12)  # Pause pour animer chaque mouvement
+
+
+# Affichage d'une boîte de dialogue de victoire
+def show_win_dialog():
+    dialog_text = FONT.render("Vous avez gagné!", True, GREEN)
+    dialog_rect = dialog_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
+    ok_text = FONT.render("Cliquez pour continuer", True, BLACK)
+    ok_rect = ok_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+
+    screen.fill(WHITE)
+    screen.blit(dialog_text, dialog_rect)
+    screen.blit(ok_text, ok_rect)
+    pygame.display.flip()
+
+    # Pause jusqu'à ce que l'utilisateur clique
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
+
+
 
 # Boucle principale
 def game_loop():
@@ -167,8 +192,15 @@ def game_loop():
                             swap_tiles(grid, selected_tiles[0], selected_tiles[1])
                             selected_tiles.clear()  # Réinitialise après le swap
 
+         # Dessine la grille
         draw_grid(screen, grid, GRID_SIZE)
         pygame.display.flip()
+
+        # Vérifie si le jeu est gagné
+        if is_goal(grid, GRID_SIZE):
+            show_win_dialog()
+            change_puzzle(GRID_SIZE)  # Redémarre avec un nouveau puzzle
+
 
     pygame.quit()
 
