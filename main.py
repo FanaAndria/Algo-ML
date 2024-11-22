@@ -60,6 +60,7 @@ def manhattan_distance(state, goal):
                 distance += abs(correct_pos[0] - i) + abs(correct_pos[1] - j)
     return distance
 
+
 # Algorithme A*
 def a_star(start, goal):
     frontier = []
@@ -119,6 +120,7 @@ def change_puzzle(new_size):
     TILE_SIZE = SCREEN_WIDTH // GRID_SIZE
     grid = create_puzzle(GRID_SIZE)
     empty_pos = [(r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE) if grid[r][c] == 0][0]
+
 
 # Résolution en temps réel
 def resolve_puzzle():
