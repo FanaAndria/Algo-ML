@@ -23,10 +23,39 @@ TILE_SIZE = SCREEN_WIDTH // GRID_SIZE
 grid = []
 empty_pos = None
 
+def is_solvable(state):
+    # Convertir la grille en une liste plate
+    flattened = [tile for row in state for tile in row]
+    size = len(state)
+
+    # Étape 1 : Calculer le nombre d'inversions
+    inversions = 0
+    for i in range(len(flattened)):
+        for j in range(i + 1, len(flattened)):
+            if flattened[i] != 0 and flattened[j] != 0 and flattened[i] > flattened[j]:
+                inversions += 1
+
+    # Étape 2 : Trouver la ligne de la case vide (0)
+    zero_row = next(row for row in range(size) if 0 in state[row])  # Ligne où se trouve la case vide
+
+    # Étape 3 : Vérifier les conditions de résolvabilité
+    if size % 2 == 0:  # Grille de taille paire (4x4)
+        return (inversions + zero_row + 1) % 2 == 0
+    else:  # Grille de taille impaire (3x3)
+        return inversions % 2 == 0
+
+
 # Création d'un puzzle mélangé
 def create_puzzle(size):
     numbers = list(range(1, size * size)) + [0]  # 0 représente le vide
     random.shuffle(numbers)
+    grid = [numbers[i * size:(i + 1) * size] for i in range(size)]
+
+    # Regenere le grid jusqu'a ce qu'il soit solvable
+    while not is_solvable(grid):
+        numbers = list(range(1, size * size)) + [0]
+        random.shuffle(numbers)
+        grid = [numbers[i * size:(i + 1) * size] for i in range(size)]
     return [numbers[i * size:(i + 1) * size] for i in range(size)]
 
 # Vérifier si un état est le but
@@ -77,6 +106,7 @@ def a_star(start, goal):
         for neighbor, move in get_neighbors(current):
             if str(neighbor) not in visited:
                 visited.add(str(neighbor))
+                #visited.add(tuple(map(tuple, neighbor)))
                 new_path = path + [move]
                 priority = len(new_path) + manhattan_distance(neighbor, goal)
                 heapq.heappush(frontier, (priority, neighbor, new_path))
@@ -121,12 +151,45 @@ def change_puzzle(new_size):
     grid = create_puzzle(GRID_SIZE)
     empty_pos = [(r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE) if grid[r][c] == 0][0]
 
+def draw_loading_text(screen, text):
+    # Texte de chargement centré
+    loading_text = FONT.render(text, True, BLACK)
+    loading_rect = loading_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.blit(loading_text, loading_rect)
+    pygame.display.flip()
+
+def draw_loading_bar(screen, progress):
+    bar_width = 300
+    bar_height = 30
+    x = (SCREEN_WIDTH - bar_width) // 2
+    y = SCREEN_HEIGHT // 2 + 50
+    pygame.draw.rect(screen, GRAY, (x, y, bar_width, bar_height))
+    pygame.draw.rect(screen, GREEN, (x, y, bar_width * progress, bar_height))  # Progression
+    pygame.display.flip()
 
 # Résolution en temps réel
 def resolve_puzzle():
     global empty_pos
+
+    if not is_solvable(grid):
+        print("Ce puzzle est non solvable.")
+        return
+
     goal = [[(i * GRID_SIZE + j + 1) % (GRID_SIZE * GRID_SIZE) for j in range(GRID_SIZE)] for i in range(GRID_SIZE)]
+
+    # Affichage de l'écran de chargement avec texte centré
+    screen.fill(WHITE)  # Fond blanc pour toute la fenêtre
+    draw_loading_text(screen, "Résolution en cours...")
+
+    # Affichage de la barre de progression
+    draw_loading_bar(screen, 0)
+
     path = a_star(grid, goal)
+
+    # Une fois la résolution terminée, on supprime l'écran de chargement
+    screen.fill(WHITE)
+    draw_grid(screen, grid, GRID_SIZE)
+    pygame.display.flip()
 
     for move in path:
         row, col = empty_pos
