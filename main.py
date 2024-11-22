@@ -24,6 +24,14 @@ TILE_SIZE = SCREEN_WIDTH // GRID_SIZE
 grid = []
 empty_pos = None
 selected_tiles = []
+move_count = 0  # Compteur de mouvements de l'utilisateur
+k = 5  # Nombre de mouvements nécessaires pour autoriser un échange (modifiable)
+has_swapped = False # Determine si l'utilisateur a effectué une échange
+
+# Fonction pour vérifier si un échange est autorisé
+def can_swap():
+    return move_count > 0 and move_count % k == 0 and not has_swapped
+
 
 def swap_tiles(grid, pos1, pos2):
     r1, c1 = pos1
@@ -162,8 +170,7 @@ def show_win_dialog():
 
 # Boucle principale
 def game_loop():
-    global selected_tiles
-    global empty_pos
+    global selected_tiles, empty_pos, move_count, has_swapped
 
     # Initialisation du puzzle
     change_puzzle(GRID_SIZE)
@@ -182,21 +189,33 @@ def game_loop():
                 if event.key == pygame.K_UP and row < GRID_SIZE - 1:
                     move_tile(grid, row + 1, col, row, col)
                     empty_pos = (row + 1, col)
+                    move_count += 1
+                    has_swapped = False
                 elif event.key == pygame.K_DOWN and row > 0:
                     move_tile(grid, row - 1, col, row, col)
                     empty_pos = (row - 1, col)
+                    move_count += 1
+                    has_swapped = False 
                 elif event.key == pygame.K_LEFT and col < GRID_SIZE - 1:
                     move_tile(grid, row, col + 1, row, col)
                     empty_pos = (row, col + 1)
+                    move_count += 1
+                    has_swapped = False 
                 elif event.key == pygame.K_RIGHT and col > 0:
                     move_tile(grid, row, col - 1, row, col)
                     empty_pos = (row, col - 1)
+                    move_count += 1
+                    has_swapped = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 if 50 <= x <= 190 and 450 <= y <= 500:  # Bouton 3x3
                     change_puzzle(3)
+                    move_count = 0
+                    has_swapped = 0
                 elif 210 <= x <= 350 and 450 <= y <= 500:  # Bouton 4x4
                     change_puzzle(4)
+                    move_count = 0
+                    has_swapped = 0
                 elif 130 <= x <= 270 and 510 <= y <= 560:  # Bouton Resolver
                     resolve_puzzle()
                 else:
@@ -204,15 +223,20 @@ def game_loop():
                     row = y // TILE_SIZE
                     col = x // TILE_SIZE
                     if row < GRID_SIZE and col < GRID_SIZE:  # Assure que le clic est dans la grille
-                        if (row, col) in selected_tiles:
-                            selected_tiles.remove((row, col))  # Désélectionne si déjà sélectionnée
+                        if can_swap(): # Vérifie si l'utilisateur peut échanger
+                            if (row, col) in selected_tiles:
+                                selected_tiles.remove((row, col))  # Désélectionne si déjà sélectionnée
+                            else:
+                                selected_tiles.append((row, col))
+                            
+                            # Effectue le swap si deux tuiles sont sélectionnées
+                            if len(selected_tiles) == 2:
+                                swap_tiles(grid, selected_tiles[0], selected_tiles[1])
+                                has_swapped = True
+                                selected_tiles.clear()  # Réinitialise après le swap
                         else:
-                            selected_tiles.append((row, col))
-                        
-                        # Effectue le swap si deux tuiles sont sélectionnées
-                        if len(selected_tiles) == 2:
-                            swap_tiles(grid, selected_tiles[0], selected_tiles[1])
-                            selected_tiles.clear()  # Réinitialise après le swap
+                            print("Vous ne pouvez pas échanger pour l'instant. Continuez à déplacer !")  # Debug/Notification
+
 
          # Dessine la grille
         draw_grid(screen, grid, GRID_SIZE)
