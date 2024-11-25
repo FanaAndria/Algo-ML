@@ -38,6 +38,7 @@ def can_swap():
 # Fonction pour afficher une boîte de dialogue pour définir ou modifier k
 def prompt_for_k():
     global k
+    
     # Utilisation de Tkinter pour obtenir une entrée utilisateur
     root = Tk()
     root.withdraw()  # Cache la fenêtre principale de Tkinter
@@ -65,7 +66,7 @@ def swap_tiles(grid, pos1, pos2):
 def draw_buttons(screen):
     pygame.draw.rect(screen, GRAY, (50, 420, 140, 50)) # Bouton 3x3
     pygame.draw.rect(screen, GRAY, (210, 420, 140, 50)) # Bouton 4x4 
-    pygame.draw.rect(screen, GRAY, (50, 480, 140, 50)) # Bouton k 
+    # pygame.draw.rect(screen, GRAY, (50, 480, 140, 50)) # Bouton k 
     pygame.draw.rect(screen, GREEN, (210, 480, 140, 50)) # Bouton résoudre
 
     text_8 = FONT.render("3x3 (8)", True, BLACK)
@@ -239,7 +240,6 @@ def game_loop():
                     has_swapped = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                print(f"x  = {x} and y = {y}")
                 if 50 <= x <= 190 and 419 <= y <= 470:  # Bouton 3x3
                     change_puzzle(3)
                     move_count = 0
@@ -250,8 +250,8 @@ def game_loop():
                     has_swapped = 0
                 elif 210 <= x <= 350 and 478 <= y <= 528:  # Bouton Resolver
                     resolve_puzzle()
-                elif 50 <= x <= 190 and 478 <= y <= 528:  # Bouton "Changer K"
-                    prompt_for_k()
+                # elif 50 <= x <= 190 and 478 <= y <= 528:  # Bouton "Changer K"
+                #     prompt_for_k()
 
                 else:
                     # Gestion de la sélection des tuiles pour le swap
