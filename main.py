@@ -63,16 +63,19 @@ def swap_tiles(grid, pos1, pos2):
 
 # Affichage des boutons
 def draw_buttons(screen):
-    pygame.draw.rect(screen, GRAY, (50, 450, 140, 50))
-    pygame.draw.rect(screen, GRAY, (210, 450, 140, 50))
-    pygame.draw.rect(screen, GREEN, (130, 510, 140, 50))
+    pygame.draw.rect(screen, GRAY, (50, 420, 140, 50)) # Bouton 3x3
+    pygame.draw.rect(screen, GRAY, (210, 420, 140, 50)) # Bouton 4x4 
+    pygame.draw.rect(screen, GRAY, (50, 480, 140, 50)) # Bouton k 
+    pygame.draw.rect(screen, GREEN, (210, 480, 140, 50)) # Bouton résoudre
 
     text_8 = FONT.render("3x3 (8)", True, BLACK)
     text_15 = FONT.render("4x4 (15)", True, BLACK)
     text_resolve = FONT.render("Résoudre", True, WHITE)
-    screen.blit(text_8, (70, 460))
-    screen.blit(text_15, (230, 460))
-    screen.blit(text_resolve, (140, 520))
+    text_k = FONT.render("k = "+ str(k), True, BLACK)
+    screen.blit(text_8, (75, 435))
+    screen.blit(text_15, (235, 435))
+    screen.blit(text_k, (75, 495))
+    screen.blit(text_resolve, (230, 495))
 
 
 
@@ -236,17 +239,18 @@ def game_loop():
                     has_swapped = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                if 50 <= x <= 190 and 450 <= y <= 500:  # Bouton 3x3
+                print(f"x  = {x} and y = {y}")
+                if 50 <= x <= 190 and 419 <= y <= 470:  # Bouton 3x3
                     change_puzzle(3)
                     move_count = 0
                     has_swapped = 0
-                elif 210 <= x <= 350 and 450 <= y <= 500:  # Bouton 4x4
+                elif 210 <= x <= 350 and 419 <= y <= 470:  # Bouton 4x4
                     change_puzzle(4)
                     move_count = 0
                     has_swapped = 0
-                elif 130 <= x <= 270 and 510 <= y <= 560:  # Bouton Resolver
+                elif 210 <= x <= 350 and 478 <= y <= 528:  # Bouton Resolver
                     resolve_puzzle()
-                elif 50 <= x <= 250 and 570 <= y <= 620:  # Bouton "Changer K"
+                elif 50 <= x <= 190 and 478 <= y <= 528:  # Bouton "Changer K"
                     prompt_for_k()
 
                 else:
